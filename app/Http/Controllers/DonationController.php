@@ -3,17 +3,21 @@
 namespace App\Http\Controllers;
 use App\Donation;
 
+use Midtrans\Config;
+use Midtrans\Notification;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DonationController extends Controller
 {
 
     public function __construct()
     {
-        \Midtrans\Config::$serverKey = config('services.midtrans.serverKey');
-        \Midtrans\Config::$isProduction = config('services.midtrans.isProduction');
-        \Midtrans\Config::$isSanitized = config('services.midtrans.isSanitized');
-        \Midtrans\Config::$is3ds = config('services.midtrans.is3ds');
+        Config::$serverKey = config('services.midtrans.serverKey');
+        Config::$isProduction = config('services.midtrans.isProduction');
+        Config::$isSanitized = config('services.midtrans.isSanitized');
+        Config::$is3ds = config('services.midtrans.is3ds');
     }
 
     public function index()
@@ -29,9 +33,9 @@ class DonationController extends Controller
 
     public function store(Request $request)
     {
-        \DB::transaction(function() use($request) {
+        DB::transaction(function() use($request) {
             $donation = Donation::create([
-                'transaction_id' => \Str::uuid(),
+                'transaction_id' => Str::uuid(),
                 'donor_name' => $request->donor_name,
                 'donor_email' => $request->donor_email,
                 'donation_type' => $request->donation_type,
@@ -71,9 +75,9 @@ class DonationController extends Controller
 
     public function notification(Request $request)
     {
-        $notif = new \Midtrans\Notification();
+        $notif = new Notification();
 
-        \DB::transaction(function() use($notif) {
+        DB::transaction(function() use($notif) {
 
           $transaction = $notif->transaction_status;
           $type = $notif->payment_type;
